@@ -1,0 +1,78 @@
+
+header {
+    border: solid black;
+    width: 100%;
+
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+body {
+    padding: 10px 10px 10px 10px;
+}
+
+h1 {
+  font-size: 20px;
+  text-align: center;
+  margin: 0;
+  padding: 20px 0;
+  color: #00539F;
+}
+
+#navigation, a {
+    padding: 10px ;
+    text-align: right;
+
+}
+
+a:hover {background-color: #f2f2f2;}
+
+div {
+    margin: 0 auto;
+    width: 20%;
+}
+
+div#content {
+    align: center;
+    text-align: center;
+    box-sizing: border-box;
+    border: 0px solid #ccc;
+}
+
+/* Bordered form */
+form {
+  border: 3px solid #f1f1f1;
+}
+
+footer {
+    padding: 10% 0;
+    align: right;
+    text-align: right;
+}
+
+/* Full-width inputs */
+input[type=text], input[type=password] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+/* Set a style for all buttons */
+input[type=submit] {
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* Add a hover effect for buttons */
+input[type=submit]:hover {
+  opacity: 0.8;
+}

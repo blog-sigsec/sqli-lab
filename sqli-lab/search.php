@@ -1,24 +1,56 @@
 <?php
 
-function search($user)
+function search($username)
 {
     require_once('config.php');
     $message = "";
-    if ($user !== "")
-    {
-        $username = trim($user);
-        $query = "SELECT username FROM Users WHERE username='" . $username . "'";
-        $result = mysqli_query($db, $query) or die(mysqli_error($db));
-        $count  = mysqli_num_rows($result);
 
-        if ($count != 1) {
-            $message = "Unknow user :(";
-        } else {
-            $row = mysqli_fetch_array($result);
-            $message = "User " . $row['username'] . " exist !";
+	# On verifie que l'entree utilisateur soit correcte, sinon on affiche une erreur.
+    if ($username !== "" && !empty($username)) {
+
+        $user = trim($username);
+
+        # On prepare notre requete SQL, le '?' sera remplace par l'entree utilisateur
+        $query = "SELECT username FROM Users WHERE username = ?";
+        if ($req = mysqli_prepare($db, $query)) {
+
+            # C'est ici que l'on va prevenir les injections.
+            # On lie les parametres fournis par l'utilisateur
+            # a la requete qui sera envoyee au serveur.
+            mysqli_stmt_bind_param($req, "s", $user);
+            mysqli_stmt_execute($req);
+            mysqli_stmt_store_result($req);
+
+            # On verifie si SLQ nous retourne un resultat
+            $num = mysqli_stmt_num_rows($req);
+            if ($num === 0) {
+                # Dans ce cas, aucun resultat.
+                $message = "Unknow user.";
+            }
+            else if ($num === 1) {
+                # Ici SQL nous renvoie un nom d'utilisateur.
+                # On recupere le resultat dans la variable 'db_user'
+                mysqli_stmt_bind_result($req, $db_user);
+                mysqli_stmt_fetch($req);
+
+                # Puis on renvoie le resultat, on libere la memoire, et on ferme la requete.
+                $message = "User " . $db_user . " exist !";
+                mysqli_stmt_free_result($req);
+                mysqli_stmt_close($req);
+            }
+            else {
+				# Dans ce cas, il y'a plusieurs resultats, ce qui n'est normalement pas possible.
+				# On renvoie donc une erreur.
+                $message = "Unknow error. Try again later.";
+            }
+        }
+        else {
+            $message = "Unknow error. Try again later.";
         }
     }
-    mysqli_close($db);
+    else {
+        $message = "Please fill the username input.";
+    }
     return $message;
 }
 ?>

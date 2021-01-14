@@ -1,86 +1,54 @@
 <?php
 
+
 function login($username, $password)
 {
     require_once('config.php');
-
     $message = "";
+
     if ($username !== "" && $password !== "")
     {
-        # Prepare data
-        $user = trim($username);
-        $pass = hash('sha256', trim($password), false);
-
-        # We request the user
-        $query = "SELECT username, password FROM Users WHERE username='" . $user . "' AND password='" . $pass . "';";
-        $result = mysqli_query($db, $query) or die(mysqli_error($db));
-        $count  = mysqli_num_rows($result);
-
-        if ($count == 0) {
-            $message = "Invalid Username or Password!";
-        }
-        else if ($count == 1) {
-
-            # LEVEL 1
-            $row = mysqli_fetch_array($result);
-            $message = "You are successfully authenticated as : " . $row['username'] . "!";
-
-            /*
-            # LEVEL 2 : less injections
-            else if (password_verify($pass, $row['password']) == true) {
-                # LEVEL 2 : HASHED PASS
-                $message = "You are successfully authenticated as : " . $row['username'] . "!";
-            }
-            else {
-                $message = "Invalid Username or Password!";
-            }
-            */
-            # LEVEL 3 : PREPARED REQUESTS
-
-
-        }
-        else {
-            $message = "Unknow error, try again later.";
-        }
-
-        mysqli_close($db);
-        return $message;
-    }
-}
-
-        /*
-          # Prepared request are safe
-
         $query = "SELECT username, password FROM Users WHERE username = ?";
-        $stmt = mysqli_prepare($db, $query);
-        if ($stmt) {
+        if ($req = mysqli_prepare($db, $query)) {
 
-            mysqli_stmt_bind_param($stmt, "s", $user);
-            mysqli_stmt_execute($stmt);
-            mysqli_stmt_store_result($stmt);
+            # C'est ici que l'on va prevenir les injections.
+            # On lie les parametres fournis par l'utilisateur
+            # a la requete qui sera envoyee au serveur.
+            mysqli_stmt_bind_param($req, "s", $user);
+            mysqli_stmt_execute($req);
+            mysqli_stmt_store_result($req);
 
-            $num = mysqli_stmt_num_rows($stmt);
-
-            if ($num == 0) {
-                $message = "Provided credentials are wrong.";
+            # On verifie le resultat
+            $num = mysqli_stmt_num_rows($req);
+            if ($num === 0) {
+                $message = "Provided credentials are wrong";
             }
-            else if ($num == 1) {
-                mysqli_stmt_bind_result($stmt, $db_user, $hash);
-                mysqli_stmt_fetch($stmt);
-                if (password_verify($pass, $hash)) {
-                    $message = "Logged as " . $db_user . " !";
+            else if ($num === 1) {
+
+                # On lie le retour dans des variables
+                mysqli_stmt_bind_result($req, $db_user, $db_hash);
+                # On recupere les resultats
+                mysqli_stmt_fetch($req);
+                if (password_verify($pass, $db_hash) === true) {
+                    $message = "You are now connected as $db_user";
                 }
+                # liberation de la memoire
+                mysqli_stmt_free_result($req);
+                mysqli_stmt_close($req);
             }
-            else {
-                $message = "Unknow error, try again later";
+            else
+            {
+                $message = "Uknow error. Try again later. [1]";
             }
-
-            mysqli_stmt_free_result($stmt);
-            mysqli_stmt_close($stmt);
         }
-        */
-
-        ?>
+        else
+        {
+            $message = "Uknow error. Try again later. [2]";
+        }
+    }
+    return $message;
+}
+?>
 
 <html>
   <head>
@@ -115,7 +83,7 @@ function login($username, $password)
   <div class="message">
     <?php
      if ($_POST['submit']) {
-     echo login($_POST['username'], $_POST['password']);
+       echo login($_POST['username'], $_POST['password']);
      }
      ?>
   </div>

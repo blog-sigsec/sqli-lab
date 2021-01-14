@@ -1,15 +1,5 @@
 <?php
 
-#session_start();
-
-# If user is logged, redirect to index.php
-#if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
-#    header("location: index.php");
-#    exit;
-#}
-
-
-
 # Process user post request
 function create($user, $pass, $confirm) {
 
@@ -52,21 +42,6 @@ function create($user, $pass, $confirm) {
             $message = "Uknow error, try again leater please.";
         }
 
-        /*
-        # LEVEL 2
-        $hash = password_hash($pass, PASSWORD_DEFAULT);
-        $query = "INSERT INTO Users (username, password) VALUES ('" . $user . "', '" . $hash . "');";
-        $result = mysqli_query($db, $query);
-        var_dump($result);
-        if ($result) {
-            $message = "Account created :) You can now login as " . $user . " !";
-            header("location: login.php");
-        }
-        else {
-            $message = "Uknow error, try again leater please.";
-        }
-        */
-        # LEVEL 3
     }
     mysqli_close($db);
     return $message;
